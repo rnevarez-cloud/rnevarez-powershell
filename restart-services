@@ -1,0 +1,3 @@
+##Restart All Services
+$SERV = Get-Service "ColdFusion **** Application Server *"
+$SERV | %{ start-service $_ }
