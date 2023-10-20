@@ -1,20 +1,39 @@
-## Deploy Patch Script
-## Author: Ricardo Nevarez
-##
-## Script used to apply hotfixes from Product Development. Not intended for full cumulative patches or full version upgrades.
-##
-## Set the $patch variable to the location of the new hotfix. Make sure that the folder structure for the patch matches the folder structure of the web root folder.
-##
-## For instance, if a script needs to be applied, make sure it is in a folder called "scripts". If a file needs to be applied to the CFC folder, make sure it is in a folder called "cfc".
-##
-## Example for $patch variable: "C:\Downloads\Eval_3.7\Eval_3.7\*" 
-##
-## MAKE SURE YOU PUT AN * (asterisk/star) AFTER THE LAST SLASH SO ALL FILES ARE PICKED UP
+### Mass Deploy Patch
+### Author: Ricardo Nevarez
 
-$folders = Get-ChildItem D:\webroot\ -Exclude "*.zip" -Directory
-$patch = "" 
+clear
 
-foreach ($folder in $folders)
-    { 
-    Copy-Item $patch -Destination $folder -force -recurse
+$patch = Read-Host "Enter the path of the application patch" ## Example: "C:\Downloads\Patch"
+$exclude = Read-Host "Enter the clients that must be excluded (ex. app_1,app_2,app_3)" ## List of folders to exclude. Example: "app_1,app_2,app_3"
+$exclude = $exclude.split(",")
+
+$folders = Get-ChildItem c:\webroot\ -Exclude $exclude -Directory
+
+$patch = "$($patch)\*"
+
+Write-Host $patch
+
+do {
+    Write-Host "--------------------------------------------------------------------------"
+    Write-Host "The patch will be applied to the following folders:"
+    foreach($f in $folders) {
+        Write-Host $f
     }
+    Write-Host "--------------------------------------------------------------------------"
+
+    $confirm = Read-Host "Continue? (Y\N)"
+
+} until (($confirm -eq 'Y') -or ($confirm -eq 'N'))
+
+switch($confirm) {
+    'Y' {
+        foreach ($folder in $folders)
+            { 
+            Write-Host "Copying $patch to $folder" -ForegroundColor Cyan
+            Copy-Item $patch -Destination $folder -force -recurse
+            }
+    }
+    'N' {
+        exit
+    }
+}
